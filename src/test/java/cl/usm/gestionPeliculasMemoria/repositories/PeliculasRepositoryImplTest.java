@@ -23,7 +23,7 @@ class PeliculasRepositoryImplTest {
         Pelicula res = repo.insert(p);
 
         assertNotNull(res);
-        assertEquals("av-202", res.getId());
+        assertTrue("av-202".equals(res.getId()));
         
         List<Pelicula> lista = repo.findAll();
         assertEquals(1, lista.size());
@@ -36,10 +36,10 @@ class PeliculasRepositoryImplTest {
 
         repo.insert(p1);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
             repo.insert(p2);
         });
-        System.out.println("DEBUG: excepcion duplicados controlada");
+        System.out.println("DEBUG: testInsertDuplicadoLanzaExcepcion - valor: " + ex.getMessage());
     }
 
     @Test
@@ -56,7 +56,7 @@ class PeliculasRepositoryImplTest {
         Pelicula res = repo.findById("INT-77");
 
         assertNotNull(res);
-        assertEquals("Interstellar", res.getTitulo());
+        assertTrue("Interstellar".equals(res.getTitulo()));
     }
 
     @Test

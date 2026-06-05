@@ -1,0 +1,149 @@
+openapi: 3.1.1
+info:
+  title: Gestión de Películas API
+  description: API REST para administrar un catálogo de películas y sus comentarios con persistencia en memoria.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8094
+    description: Servidor de desarrollo local
+paths:
+  /peliculas:
+    get:
+      summary: Obtener películas
+      description: Obtiene la lista de películas registradas en el catálogo. Permite realizar filtros por ID o por título de película usando el parámetro 'q'.
+      operationId: getAllPeliculas
+      parameters:
+        - name: q
+          in: query
+          description: Término de búsqueda para filtrar películas por su ID o por su título de forma parcial (case-insensitive).
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de películas obtenida exitosamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pelicula'
+        '500':
+          description: Error interno del servidor.
+    post:
+      summary: Registrar una película
+      description: Registra una nueva película en el catálogo. El sistema genera de forma automática un token de descarga alfanumérico seguro para la película antes de guardarla.
+      operationId: createPelicula
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PeliculaInput'
+      responses:
+        '200':
+          description: Película creada exitosamente. Retorna la película con su token generado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pelicula'
+        '500':
+          description: Error interno del servidor (por ejemplo, si el ID ya existe).
+  /peliculas/{id}:
+    get:
+      summary: Obtener película por ID
+      description: Obtiene los detalles de una película específica usando su identificador único.
+      operationId: getPeliculaById
+      parameters:
+        - name: id
+          in: path
+          description: Identificador único de la película.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Película encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pelicula'
+        '404':
+          description: La película con el ID especificado no existe.
+        '505':
+          description: Error interno del servidor.
+  /peliculas/{id}/comentarios:
+    get:
+      summary: Obtener comentarios de una película
+      description: Obtiene únicamente los comentarios asociados a una película identificada por su ID.
+      operationId: getComentariosByPeliculaId
+      parameters:
+        - name: id
+          in: path
+          description: Identificador único de la película de la cual obtener los comentarios.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de comentarios obtenida exitosamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comentario'
+        '404':
+          description: La película con el ID especificado no existe.
+        '500':
+          description: Error interno del servidor.
+components:
+  schemas:
+    Comentario:
+      type: object
+      properties:
+        usuario:
+          type: string
+          example: "juan_perez"
+        comentario:
+          type: string
+          example: "Excelente película, muy recomendada."
+    Pelicula:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "PELI123"
+        titulo:
+          type: string
+          example: "Inception"
+        director:
+          type:          string
+          example: "Christopher Nolan"
+        tokenDescarga:
+          type: string
+          example: "a7F9kB2mN1"
+        comentarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comentario'
+    PeliculaInput:
+      type: object
+      required:
+        - id
+        - titulo
+        - director
+      properties:
+        id:
+          type: string
+          example: "PELI123"
+        titulo:
+          type: string
+          example: "Inception"
+        director:
+          type: string
+          example: "Christopher Nolan"
+        comentarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comentario'
